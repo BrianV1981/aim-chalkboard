@@ -146,20 +146,11 @@ def action_escalate(team_id):
         run_git(["push", "origin", "main"])
         print("[SUCCESS] GitHub Issue board updated.")
 
-def action_daemon(team_id, interval):
-    print(f"[*] Synthesizing Postmaster Daemon (Polling Interval: {interval} minutes)")
-    print(f"[*] Network: aim-chalkboard | Core Anchor: {team_id.upper()}")
-    while True:
-        print("\n[*] --- Postmaster Heartbeat Sweep ---")
-        run_git(["pull", "origin", "main"])
-        action_moderate()
-        action_escalate(team_id)
-        print(f"[*] --- Sweep Terminated. Sleeping for {interval} minutes ---")
-        time.sleep(int(interval) * 60)
+
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: aim_postmaster.py <escalate|daemon>")
+        print("Usage: aim_postmaster.py escalate")
         sys.exit(1)
 
     action = sys.argv[1]
@@ -176,13 +167,6 @@ def main():
 
     if action == "escalate":
         action_escalate(team_id)
-    elif action == "daemon":
-        interval = 5
-        if "--interval" in sys.argv:
-            idx = sys.argv.index("--interval")
-            if idx + 1 < len(sys.argv):
-                interval = int(sys.argv[idx+1])
-        action_daemon(team_id, interval)
     else:
         print(f"Unknown Postmaster action: {action}")
 
