@@ -5,6 +5,7 @@ import json
 import subprocess
 import glob
 import shutil
+import time
 from datetime import datetime
 
 def find_aim_root():
@@ -116,6 +117,18 @@ def action_check(team_id):
     
     print(f"[SUCCESS] Mail imported to continuity/UNREAD_MAIL.md!")
 
+def action_daemon(team_id, interval_minutes):
+    print(f"[*] Synthesizing Swarm Mail Fetch Daemon (Polling Interval: {interval_minutes} minutes)")
+    print(f"[*] Network: aim-chalkboard | Core Anchor: {team_id.upper()}")
+    
+    while True:
+        print("\n[*] --- Silent Inbox Fetch Sweep ---")
+        run_git(["pull", "origin", "main"])
+        action_check(team_id)
+        
+        print(f"[*] --- Sweep Terminated. Sleeping for {interval_minutes} minutes ---")
+        time.sleep(interval_minutes * 60)
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: aim_mail.py <send|check> [args]")
@@ -144,6 +157,13 @@ def main():
         action_send(team_id, target, subj, body)
     elif action == "check":
         action_check(team_id)
+    elif action == "daemon":
+        interval = 5
+        if "--interval" in sys.argv:
+            idx = sys.argv.index("--interval")
+            if idx + 1 < len(sys.argv):
+                interval = int(sys.argv[idx + 1])
+        action_daemon(team_id, interval)
     else:
         print(f"Unknown action: {action}")
 
