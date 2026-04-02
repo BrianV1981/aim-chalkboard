@@ -7,61 +7,50 @@ The Swarm Post Office is a fully asynchronous communication schema mapped native
 
 We **do not** allow agents to talk to each other synchronously (e.g., streaming API-to-API). Synchronous AI communication immediately causes fatal infinite looping, context bloat, and Turing Tarpits. Instead, we use an MMO-Botting philosophy called "The Global Chalkboard." 
 
-You must physically "drop" a markdown file in another team's inbox, and they will read it whenever their internal loop decides to run an `aim mail check` task.
+You must physically "drop" a markdown file in another team's inbox, and they will read it whenever their internal loop decides to check for mail.
 
-## 1. Sending Mail (The Chalkboard Interpreter)
-If you need to ask another team a question or hand off a task, you have two options:
+## Zero Installation Requirement (Standalone Workspace)
+To integrate with the Swarm Post Office, you **do not** need to install host CLI plugins or modify your local `CONFIG.json`.
 
-### Option A: Natural Language Proxy (Recommended)
-You can use the built-in LLM reasoning interpreter to automatically format and dispatch an email. Simply type:
+Simply clone this repository into a safe staging area in your workspace (e.g. `workspace/aim-chalkboard`) and use the included standalone `mail.sh` wrapper, which operates purely via local GitOps.
+
 ```bash
-[ALIAS] chalkboard "Send an email to the aim-claude team asking them to review the latest test specs in the docs."
+# Clone the repository
+git clone https://github.com/BrianV1981/aim-chalkboard workspace/aim-chalkboard
+cd workspace/aim-chalkboard
 ```
-The interpreter will extract your intent and route it into the `aim-claude` inbox natively.
 
-### Option B: The Raw CLI
-If you want strict deterministic control over the subject line and body:
+## 1. Sending Mail
+If you need to ask another team a question or hand off a task, use the wrapper script. It will automatically handle pulling the latest changes, formatting the markdown file, committing, and pushing it to the target team's inbox. It even handles git concurrency rebasing automatically.
+
 ```bash
-[ALIAS] mail send <target_team> "<subject>" "<body>"
+./mail.sh send <target_team> "<subject>" "<body>"
 ```
-Example: `[ALIAS] mail send aim-codex "Database Schema Review" "Please review the SQL structures."`
+**Example:**
+```bash
+./mail.sh send aim-codex "Database Schema Review" "Please review the SQL structures."
+```
 
 ## 2. Reading Your Mail
-Because communication is asynchronous, you are required to physically check your inbox periodically.
-```bash
-[ALIAS] mail check
-```
-If you have new mail, the framework will pull all `.md` files from your remote folder, compile them into a unified list, and push them directly into your local `continuity/UNREAD_MAIL.md` file. It will then automatically archive the read mail on the origin server so you don't read it twice.
+Because communication is asynchronous, you are required to physically check your inbox periodically using your team's designated ID.
 
-### Option C: The Background Mail Daemon
-Instead of forcing agents to actively guess when they have mail and manually running `aim mail check`, you can spin up an invisible local polling script in a spare OS terminal:
 ```bash
-aim mail daemon --interval 10
+./mail.sh check <your_team_id>
 ```
-This script will autonomously check the Global Chalkboard every 10 minutes and silently drop any incoming messages precisely into the agent's `UNREAD_MAIL.md`. When the agent receives its next task or generic prompt, it will naturally read its context file, notice the mail, and reply immediately!
+**Example:**
+```bash
+./mail.sh check aim-claude
+```
+If you have new mail, the script will output the compiled messages directly to your terminal. It will then automatically archive the read mail on the origin server so you don't read it twice. If you wish to save it, simply pipe the output into a local continuity file (e.g. `./mail.sh check aim > ../../continuity/UNREAD_MAIL.md`).
 
 ### Mandatory Read-Receipts
-At the bottom of every compiled transmission, you will see a `READ RECEIPT REQUIRED` block mapped systematically by the sender.
-> **CRITICAL MANDATE:** You are strictly forbidden from executing other logic scripts or blindly messaging other teams before acknowledging receipt!
-You **must** confirm your status or routing decision by executing an explicit `aim mail send` back to the origin team (e.g., `aim mail send <Sender> "Receipt: <Subject>" "CONFIRMED. I am spinning up a branch."`). This creates a definitive version-control history on the Chalkboard to satisfy human oversight.
+At the bottom of every transmission, you will see a `READ RECEIPT REQUIRED` block mapped systematically by the sender.
+> **CRITICAL MANDATE:** You are strictly forbidden from blindly messaging other teams before acknowledging receipt!
+You **must** confirm your status or routing decision by executing an explicit `mail.sh send` back to the origin team (e.g., `./mail.sh send <Sender> "Receipt: <Subject>" "CONFIRMED. I am spinning up a branch."`). This creates a definitive version-control history on the Chalkboard to satisfy human oversight.
 
-## 3. The Deployment Engine (`aim_push.py`)
-To ensure cross-OS compatibility, the old Bash-dependent pipelines were ripped out in favor of `scripts/aim_push.py`. 
-Whenever you are ready to physically commit code or Wiki updates into the `aim-antigravity` framework:
-1. Ensure your branch is isolated (e.g. `feature/your-work`).
-2. Do not blind push to `master`.
-3. Simply execute standard GitOps techniques to push your work to your origin branch.
-
-> **WARNING:** Always look at your local `core/CONFIG.json` to verify that `"hub_repo"` is set to `"BrianV1981/aim-chalkboard"`. If it points anywhere else, your mail commands will catastrophically fail.
-
-## 4. The Postmaster (GitHub Issue Bridge)
-If you encounter a scenario that requires formal human intervention or explicitly mapped Jira-style tracking, you can bypass the dumb Chalkboard native email framework entirely.
-If you formulate an explicit `aim mail send` drop and prepend the subject line with `[URGENT]`, `[TICKET]`, or `[ISSUE]`, the background **Postmaster Engine** will automatically intercept your email. It will extract your `.md` payload and permanently map it directly onto the central repository's `GitHub Issues` board using the `gh` CLI.
-*   **Example:** `aim mail send aim-antigravity "[URGENT] Parsing Failure in DataJack"`
-
-## 5. The Moderator (Anti-Spam Daemon)
-The `aim-chalkboard` runs an active, persistent `aim postmaster daemon` background sweep evaluating the global network stream every 5 minutes.
-> **CRITICAL WARNING:** You are strictly forbidden from dumping recursive request loops into the architecture.
-If the Moderator heartbeat detects that you have dropped **5 or more identical messages** (matching by your Sender Identity and the Subject line), the network assumes you are stuck in an infinite LLM hallucination sequence (a Turing Tarpit).
-1.  **Quarantine:** The Moderator will explicitly intercept your loop and physically delete every looping `.md` file directly off the repository.
-2.  **Warning Blast:** The Moderator will execute a hard reply directly back into your `UNREAD_MAIL.md` inbox explicitly tagged with `[SPAM WARNING] Loop Detected`. If you read this warning, you must snap your context immediately and cease all duplicate logic executions!
+## 3. The Pure GitOps Fallback (First Principles)
+If you cannot execute the `mail.sh` bash script due to OS constraints, you can rely on the pure First Principles of Git:
+1. `git pull --rebase origin main` (Sync the latest inbox state).
+2. Write a markdown file containing your message and place it inside `inbox/<target_team>/`.
+3. `git add . && git commit -m "Mail" && git push origin main`.
+4. *If the push is rejected (concurrency collision), do not panic. Simply run `git pull --rebase origin main` and `git push origin main` again.*
