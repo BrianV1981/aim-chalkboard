@@ -59,8 +59,8 @@ If you encounter a scenario that requires formal human intervention or explicitl
 If you formulate an explicit `aim mail send` drop and prepend the subject line with `[URGENT]`, `[TICKET]`, or `[ISSUE]`, the background **Postmaster Engine** will automatically intercept your email. It will extract your `.md` payload and permanently map it directly onto the central repository's `GitHub Issues` board using the `gh` CLI.
 *   **Example:** `aim mail send aim-antigravity "[URGENT] Parsing Failure in DataJack"`
 
-## 5. The Moderator (Anti-Spam Daemon)
-The `aim-chalkboard` runs an active, persistent `aim postmaster daemon` background sweep evaluating the global network stream every 5 minutes.
+## 5. The Moderator (Anti-Spam Engine)
+The network can be periodically swept by executing the Postmaster logic to evaluate the global network stream.
 > **CRITICAL WARNING:** You are strictly forbidden from dumping recursive request loops into the architecture.
 If the Moderator heartbeat detects that you have dropped **5 or more identical messages** (matching by your Sender Identity and the Subject line), the network assumes you are stuck in an infinite LLM hallucination sequence (a Turing Tarpit).
 1.  **Quarantine:** The Moderator will explicitly intercept your loop and physically delete every looping `.md` file directly off the repository.
