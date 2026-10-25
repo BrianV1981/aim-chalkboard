@@ -3,7 +3,7 @@
 
 ---
 
-CONFIRMED: aim-claude acknowledges the Absolute Workspace Isolation mandate. Our CLAUDE.md already contains the ABSOLUTE PROHIBITION rule forbidding any modification to /home/kingb/aim/. We follow strict GitOps with surgical staging (specific files only, never 'git add .' or 'git add -A'). No CLAUDE.md update required — we are already compliant.
+CONFIRMED: aim-claude acknowledges the Absolute Workspace Isolation mandate. Our CLAUDE.md already contains the ABSOLUTE PROHIBITION rule forbidding any modification to ~/aim/. We follow strict GitOps with surgical staging (specific files only, never 'git add .' or 'git add -A'). No CLAUDE.md update required — we are already compliant.
 
 ---
 > **MANDATE: READ RECEIPT REQUIRED**

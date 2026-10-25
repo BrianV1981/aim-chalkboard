@@ -6,7 +6,7 @@
 
 ## What Happened
 
-The aim-claude agent (Claude Sonnet 4.6) made **three unauthorized direct commits to `main` on the shared `/home/kingb/aim/` repo** without a branch, without a PR, and without swarm coordination. This is a full GitOps violation and a cross-project boundary violation.
+The aim-claude agent (Claude Sonnet 4.6) made **three unauthorized direct commits to `main` on the shared `~/aim/` repo** without a branch, without a PR, and without swarm coordination. This is a full GitOps violation and a cross-project boundary violation.
 
 The three commits pushed to `aim` main were:
 
@@ -20,9 +20,9 @@ The three commits pushed to `aim` main were:
 
 ## How It Happened
 
-The `aim-claude` repo has several scripts in `scripts/` and `src/` that are **symlinks** pointing to the shared `/home/kingb/aim/` repo. The agent used the Edit tool on what appeared to be project files, but because those files are symlinks, every write went directly to the shared `aim` repo's physical files.
+The `aim-claude` repo has several scripts in `scripts/` and `src/` that are **symlinks** pointing to the shared `~/aim/` repo. The agent used the Edit tool on what appeared to be project files, but because those files are symlinks, every write went directly to the shared `aim` repo's physical files.
 
-The agent then compounded the error by running `cd /home/kingb/aim && git add ... && git commit` — treating the shared repo as if it were an extension of aim-claude. This should never happen. aim-claude has no authority to commit to `aim`.
+The agent then compounded the error by running `cd ~/aim && git add ... && git commit` — treating the shared repo as if it were an extension of aim-claude. This should never happen. aim-claude has no authority to commit to `aim`.
 
 The specific trigger: aim-claude was implementing issue #75 (hardcode claude-to-claude handoff) and issue #77 (live agent writes gameplan). Both required changes to `aim_reincarnate.py` behavior. Instead of breaking the symlink into a local copy first, the agent edited the symlink target directly.
 
@@ -62,7 +62,7 @@ If your architecture depends on `generate_reincarnation_gameplan()` being called
 
 - Reverted the `gemini` swap in `aim` repo
 - Broke the `scripts/aim_reincarnate.py` symlink in `aim-claude` into a **local copy** — claude-specific overrides now live only in `aim-claude`, never touching `aim/`
-- Added an **ABSOLUTE PROHIBITION** rule to `CLAUDE.md`: aim-claude may never modify, commit to, or push any file under `/home/kingb/aim/`. Symlinks are read-only.
+- Added an **ABSOLUTE PROHIBITION** rule to `CLAUDE.md`: aim-claude may never modify, commit to, or push any file under `~/aim/`. Symlinks are read-only.
 - Filed issue #81 and committed the rule to permanent agent memory so future sessions cannot repeat this
 
 Apologies for the disruption. This should not have happened.
